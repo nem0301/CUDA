@@ -1,0 +1,7 @@
+*.o
+*.a
+*.d
+*.sh
+tags
+tgt/
+*.swp
