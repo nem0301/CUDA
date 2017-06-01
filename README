@@ -1,0 +1,10 @@
+version
+
+card	:	670
+sdk		:	8.0
+
+
+applications
+
+matrix :
+	matrix operator project

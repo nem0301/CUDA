@@ -14,7 +14,7 @@ CXX = nvcc
 LD = nvcc
 
 INCLUDES = -I./hdr
-CFLAGS = -g -std=c++11 -DTEST $(CUDA_CFLAGS)
+CFLAGS = -g -DTEST -std=c++11 -DDEBUG_LVL=3 $(CUDA_CFLAGS)
 LIBS = -lpthread $(CUDA_LIBS)
 
 SRCS = $(wildcard $(SRC_DIR)/*.cu)

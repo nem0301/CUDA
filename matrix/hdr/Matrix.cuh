@@ -428,6 +428,17 @@ public:
 		return ret;
 	}
 
+	Matrix GaussJordanInverse()
+	{
+		Matrix ret(this->dimx * 2, this->dimy);
+		Matrix I(this->dimx, this->dimy);
+		I = I.identity();
+		ret = *this | I;
+
+		return ret;
+	}
+
+
 	/*
 	Matrix inverse()
 	{
@@ -456,17 +467,14 @@ public:
 			for (int k = 0; k < i; k++)
 			{
 				x = ret.dimx * k + i;
-				//s += pow(ret.h_value[k][i], 2);
 				s += pow(ret.h_value[x], 2);
 			}
 			x = ret.dimx * i + i;
-			//float d = this->value[i][i] - s;
 			float d = this->h_value[x] - s;
 
 			if (abs(d) < ztol)
 			{
 				x = ret.dimx * i + i;
-				//ret.value[i][i] = 0;
 				ret.h_value[x] = 0;
 			}
 			else
@@ -477,7 +485,6 @@ public:
 					return ret;
 				}
 				x = ret.dimx * i + i;
-				//ret.value[i][i] = sqrt(d);
 				ret.h_value[x] = sqrt(d);
 			}
 
@@ -488,7 +495,6 @@ public:
 				{
 					x = ret.dimx * k + i;
 					int x2 = ret.dimx * k + j;
-					//s += ret.value[k][i] * ret.value[k][j];
 					s += ret.h_value[x] * ret.h_value[x2];
 				}
 				if (abs(s) < ztol)
@@ -496,7 +502,6 @@ public:
 
 				x = ret.dimx * i + i;
 				int x2 = ret.dimx * i + j;
-				//ret.value[i][j] = (this->h_value[i][j] - s) / ret.value[i][i];
 				ret.h_value[x2] = (this->h_value[x2] - s) / ret.h_value[x];
 			}
 		}
@@ -512,17 +517,14 @@ public:
 		for (int j = this->dimx - 1;  j >= 0; j--)
 		{
 			x = ret.dimx * j + j;
-			//float tjj = this->h_value[j][j];
 			float tjj = this->h_value[x];
 			float s = 0;
 			for (int k = j+1; k < this->dimx; k++)
 			{
 				x = ret.dimx * j + k;
-				//s += this->h_value[j][k] * ret.value[j][k];
 				s += this->h_value[x] * ret.h_value[x];
 			}
 			x = ret.dimx * j + j;
-			//ret.value[j][j] = 1.0/pow(tjj, 2) - s / tjj;
 			ret.h_value[x] = 1.0/pow(tjj, 2) - s / tjj;
 
 			for (int i = j - 1;  i >= 0; i--)
@@ -532,13 +534,11 @@ public:
 				{
 					x = ret.dimx * i + k;
 					int x2 = ret.dimx * k + j;
-					//s += this->h_value[i][k] * ret.value[k][j];
 					s += this->h_value[x] * ret.h_value[x2];
 				}
 				x = ret.dimx * j + i;
 				int x2 = ret.dimx * i + j;
 				int x3 = ret.dimx * i + i;
-				//ret.value[j][i] = ret.value[i][j] = -s / this->h_value[i][i];
 				ret.h_value[x] = ret.h_value[x2] = -s / this->h_value[x3];
 			}
 		}

@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <memory.h>
 
-#include <Matrix.cu>
+#include <PrintLog.h>
 
+#include <Matrix.cuh>
+#include <Timer.cuh>
 
 int main()
 {
@@ -35,28 +37,21 @@ int main()
 	Matrix mat2(data, size, size2);
 	Matrix mat3(size, size2);
 
-	cudaEvent_t start, stop;
-	cudaEventCreate(&start);
-	cudaEventCreate(&stop);
-	cudaEventRecord(start, 0);
+	Timer tt;
 
-	mat1.inverse();
-
-	
-
-	cudaEventRecord(stop, 0);
-	cudaEventSynchronize(stop);
-	float elapse;
-	cudaEventElapsedTime(&elapse, start, stop);
-	printf("%.6f ms\n", elapse);
-	cudaEventDestroy(start);
-	cudaEventDestroy(stop);
-
+	tt.start();
+	mat1 = mat1 * mat2;
+	printf("%f ms\n", tt.stop());
 
 	//mat1.printMatrix();
 	//mat2.printMatrix();
 	//mat3.printMatrix();
-	
+
+	DEBUG(DEBUG_ERR, "test %d, %d\n", 1, 2);
+	DEBUG(DEBUG_WARN, "test %d, %d\n", 1, 2);
+	DEBUG(DEBUG_INFO, "test %d, %d\n", 1, 2);
+	DEBUG(DEBUG_VERB, "test %d, %d\n", 1, 2);
+	DEBUG(4, "test %d, %d\n", 1, 2);
 
 	return 0;
 }
