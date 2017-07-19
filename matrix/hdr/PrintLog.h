@@ -2,6 +2,7 @@
 #define __PRINT_LOG_H__
 
 #include <stdarg.h>
+#include <stdio.h>
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -38,6 +39,9 @@ const char *levelColor[4] =
 
 void debugPrintf(const int level, const char *fmt, ...)
 {
+	va_list pvar;
+	char str[1024];
+
 	if (level < 0 || level > DEBUG_MAX_LVL)
 	{
 		DEBUG(DEBUG_ERR, "[DEBUG] level error, level=%d\n", level);
@@ -47,8 +51,6 @@ void debugPrintf(const int level, const char *fmt, ...)
 	if (level > DEBUG_LVL)
 		return;
 
-	va_list pvar;
-	char str[1024];
 	va_start(pvar, fmt);
 	vsprintf(str, fmt, pvar);
 	fprintf(DEBUG_OUT, "%s%s" ANSI_COLOR_RESET, levelColor[level], str);

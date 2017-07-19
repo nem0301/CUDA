@@ -8,23 +8,34 @@
 
 int main()
 {
-	int size = 1024;
-	int size2 = 1024;
+	int size = 2;
+	int size2 = 2;
 	float data[size * size2];
 
-	//int k[] = { 2, 2, 3, 4 };
+	int k[] = { 2, 2, 3, 4 };
 	for (int i = 0; i < size2; i++)
 	{
 		for (int j = 0; j < size; j++)
 		{
 			int x = size * i + j;
-			data[x] = i;
+			data[x] = k[size * i + j];
 		}
 	}
 
 	Matrix mat1(data, size, size2);
 
-	//int t[] = { 5, 6, 7, 8 };
+	int t[] = { 5, 6, 7, 8 };
+	for (int i = 0; i < size2; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			int x = size * i + j;
+			data[x] = t[size * i + j];
+		}
+	}
+	mat1.printMatrix();
+
+	/*
 	for (int i = 0; i < size2; i++)
 	{
 		for (int j = 0; j < size; j++)
@@ -33,6 +44,8 @@ int main()
 			data[x] = i;
 		}
 	}
+	Matrix mat1(data, size, size2);
+	*/
 
 	Matrix mat2(data, size, size2);
 	Matrix mat3(size, size2);
@@ -40,18 +53,20 @@ int main()
 	Timer tt;
 
 	tt.start();
-	mat1 = mat1 * mat2;
-	printf("%f ms\n", tt.stop());
+	mat3 = mat1.inverse();
+	DEBUG(DEBUG_INFO, "%f ms\n", tt.stop());
+	mat3.printMatrix();
+
+	tt.start();
+	mat3 = mat1.GaussJordanInverse();
+	DEBUG(DEBUG_INFO, "%f ms\n", tt.stop());
+	mat3.printMatrix();
+
+
 
 	//mat1.printMatrix();
 	//mat2.printMatrix();
 	//mat3.printMatrix();
-
-	DEBUG(DEBUG_ERR, "test %d, %d\n", 1, 2);
-	DEBUG(DEBUG_WARN, "test %d, %d\n", 1, 2);
-	DEBUG(DEBUG_INFO, "test %d, %d\n", 1, 2);
-	DEBUG(DEBUG_VERB, "test %d, %d\n", 1, 2);
-	DEBUG(4, "test %d, %d\n", 1, 2);
 
 	return 0;
 }

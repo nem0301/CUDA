@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include <Common.h>
+#include <PrintLog.h>
 
 #define E_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062
 
@@ -102,22 +103,45 @@ __global__ void MatTrans(float *C, float *A, int width, int height)
 	C[c] = A[a];
 }
 
- __global__ void GaussJordan(float *I,  float *A, int width, int height, int rowId)
+__global__ void checkValidInverse(float *d_AI, int width, int height)
 {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	int size = gridDim.x * blockDim.x;
 	int rows = size / height;
 	int x = index % rows;	// colId
 	int y = index / rows;	// rowId
-	extern __shared__ float Ri[];
-	__shared__ float Aii;
+}
 
-	Ri[x] = A[width * y + x + rowId];
-	Aii = A[width * rowId + rowId];
+__global__ void GaussJordan(float *d_AI, int width, int height, int rowId)
+{
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	int size = gridDim.x * blockDim.x;
+	int rows = size / height;
+	int x = index % rows;	// colId
+	int y = index / rows;	// rowId
+	float Aii = d_AI[rowId * width + rowId];
+	if (Aii == 0)
+		return;
 
-	__syncthreads();
-	Ri[x] = Ri[x] / Aii;
-	I[size * y + x] = Ri[x];
+	int ii = width * y + x;
+	d_AI[ii] /= Aii;
+
+	//__syncthreads();
+
+	/*
+	for (int i = 0; i < height; i++)
+	{
+		int tmp = width * i + x;
+		if (i == rowId || d_AI[tmp] == 0)
+			continue;
+
+		for (int j = 0; j < width / 2 + 1; j++)
+		{
+			int tmp2 = width * i + j;
+			d_AI[tmp2] -= d_AI[width * rowId + j];
+		}
+	}
+	*/
 }
 
 class Matrix
@@ -228,7 +252,7 @@ public:
 	Matrix zero()
 	{
 		if (dimx < 1 || dimy < 1)
-			cout << "0 invalid size" << endl;
+			DEBUG(DEBUG_ERR, "0 invalid size\n");
 		else
 		{
 			for (int i = 0; i < dimy; i++)
@@ -247,7 +271,7 @@ public:
 	Matrix identity()
 	{
 		if (dimx < 1 || dimy < 1)
-			cout << "I invalid size" << endl;
+			DEBUG(DEBUG_ERR, "I invalid size\n");
 		else
 		{
 			for (int i = 0; i < dimy; i++)
@@ -271,11 +295,8 @@ public:
 		if (m.dimx != this->dimx ||
 			m.dimy != this->dimy)
 		{
-			cout << "= invalid size" << endl;
-			cout << this->dimx << " ";
-			cout << this->dimy << " ";
-			cout << m.dimx << " ";
-			cout << m.dimy << endl;
+			DEBUG(DEBUG_ERR, "= invalid size %d %d %d %d\n",
+					this->dimx, this->dimy, m.dimx, m.dimy);
 		}
 		else
 		{
@@ -294,11 +315,8 @@ public:
 
 		if (x1 != x2 ||	y1 != y2)
 		{
-			cout << "+ invalid size" << endl;
-			cout << x1 << " ";
-			cout << y1 << " ";
-			cout << x2 << " ";
-			cout << y2 << endl;
+			DEBUG(DEBUG_ERR, "+ invalid size %d %d %d %d\n",
+					x1, y1, x2, y2);
 			return *this;
 		}
 		else
@@ -321,11 +339,8 @@ public:
 
 		if (x1 != x2 ||	y1 != y2)
 		{
-			cout << "- invalid size" << endl;
-			cout << x1 << " ";
-			cout << y1 << " ";
-			cout << x2 << " ";
-			cout << y2 << endl;
+			DEBUG(DEBUG_ERR, "- invalid size %d %d %d %d\n",
+					x1, y1, x2, y2);
 			return *this;
 		}
 		else
@@ -346,11 +361,8 @@ public:
 
 		if (x1 != y2)
 		{
-			cout << "* invalid size" << endl;
-			cout << x1 << " ";
-			cout << y1 << " ";
-			cout << x2 << " ";
-			cout << y2 << endl;
+			DEBUG(DEBUG_ERR, "* invalid size %d %d %d %d\n",
+					x1, y1, x2, y2);
 
 			return *this;
 		}
@@ -400,11 +412,8 @@ public:
 
 		if (y1 != y2)
 		{
-			cout << "| invalid size" << endl;
-			cout << x1 << " ";
-			cout << y1 << " ";
-			cout << x2 << " ";
-			cout << y2 << endl;
+			DEBUG(DEBUG_ERR, "| invalid size %d %d %d %d\n",
+					x1, y1, x2, y2);
 			return *this;
 		}
 		else
@@ -430,10 +439,19 @@ public:
 
 	Matrix GaussJordanInverse()
 	{
-		Matrix ret(this->dimx * 2, this->dimy);
+		Matrix ret(this->dimx, this->dimy);
+
+		// argument matrix A|I
+		Matrix tmp(this->dimx * 2, this->dimy);
 		Matrix I(this->dimx, this->dimy);
 		I = I.identity();
-		ret = *this | I;
+		tmp = *this | I;
+
+		for (int i = 0; i < tmp.dimx; i++)
+		{
+			GaussJordan<<<tmp.grid, tmp.block>>>
+				(tmp.d_value, tmp.dimx, tmp.dimy, i);
+		}
 
 		return ret;
 	}
@@ -481,7 +499,7 @@ public:
 			{
 				if (d < 0.0)
 				{
-					cout << "matrix not positivie-definite" << endl;
+					DEBUG(DEBUG_INFO, "matrix not positive-definite\n");
 					return ret;
 				}
 				x = ret.dimx * i + i;
@@ -571,18 +589,17 @@ public:
 	void printMatrix()
 	{
 		dtoh(this->h_value, this->d_value, this->size);
-		cout << "[" <<this->grid << " X " << this->block << "]" <<endl;
+		DEBUG(DEBUG_INFO, "[%d X %d]\n", this->grid, this->block);
 		for (int i = 0; i < this->dimy; i++)
 		{
 			for (int j = 0; j < this->dimx; j++)
 			{
 				int x = i * this->dimx + j;
-				printf("%10.5f ", this->h_value[x]);
+				DEBUG(DEBUG_INFO, "%10.5f ", this->h_value[x]);
 			}
-			printf("\n");
+			DEBUG(DEBUG_INFO, "\n");
 		}
-		cout << endl;
-
+		DEBUG(DEBUG_INFO, "\n");
 	}
 };
 
