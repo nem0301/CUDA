@@ -23,50 +23,51 @@ int main()
 	}
 
 	Matrix mat1(data, size, size2);
+	mat1.transpose();
 
-	int t[] = { 5, 6, 7, 8 };
-	for (int i = 0; i < size2; i++)
-	{
-		for (int j = 0; j < size; j++)
-		{
-			int x = size * i + j;
-			data[x] = t[size * i + j];
-		}
-	}
-	mat1.printMatrix();
-
-	/*
-	for (int i = 0; i < size2; i++)
-	{
-		for (int j = 0; j < size; j++)
-		{
-			int x = size * i + j;
-			data[x] = i;
-		}
-	}
-	Matrix mat1(data, size, size2);
-	*/
-
-	Matrix mat2(data, size, size2);
-	Matrix mat3(size, size2);
-
-	Timer tt;
-
-	tt.start();
-	mat3 = mat1.inverse();
-	DEBUG(DEBUG_INFO, "%f ms\n", tt.stop());
-	mat3.printMatrix();
-
-	tt.start();
-	mat3 = mat1.GaussJordanInverse();
-	DEBUG(DEBUG_INFO, "%f ms\n", tt.stop());
-	mat3.printMatrix();
-
-
-
-	//mat1.printMatrix();
-	//mat2.printMatrix();
-	//mat3.printMatrix();
+//	int t[] = { 5, 6, 7, 8 };
+//	for (int i = 0; i < size2; i++)
+//	{
+//		for (int j = 0; j < size; j++)
+//		{
+//			int x = size * i + j;
+//			data[x] = t[size * i + j];
+//		}
+//	}
+//	mat1.printMatrix();
+//
+//	/*
+//	for (int i = 0; i < size2; i++)
+//	{
+//		for (int j = 0; j < size; j++)
+//		{
+//			int x = size * i + j;
+//			data[x] = i;
+//		}
+//	}
+//	Matrix mat1(data, size, size2);
+//	*/
+//
+//	Matrix mat2(data, size, size2);
+//	Matrix mat3(size, size2);
+//
+//	Timer tt;
+//
+//	tt.start();
+//	mat3 = mat1.inverse();
+//	DEBUG(DEBUG_INFO, "%f ms\n", tt.stop());
+//	mat3.printMatrix();
+//
+//	tt.start();
+//	mat3 = mat1.GaussJordanInverse();
+//	DEBUG(DEBUG_INFO, "%f ms\n", tt.stop());
+//	mat3.printMatrix();
+//
+//
+//
+//	//mat1.printMatrix();
+//	//mat2.printMatrix();
+//	//mat3.printMatrix();
 
 	return 0;
 }

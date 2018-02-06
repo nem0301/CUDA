@@ -457,11 +457,11 @@ public:
 	}
 
 
-	/*
 	Matrix inverse()
 	{
 		Matrix ret(this->dimy, this->dimx);
 		
+		/*
 		for (int i = 0; i < this->dimx; i++)
 		{
 			GaussJordan<<<this->grid, this->block, this->dimx>>>
@@ -469,9 +469,9 @@ public:
 		}
 
 		dtoh(ret.h_value, ret.d_value, ret.size);
+		*/
 		return ret;
 	}
-	*/
 
 
 	Matrix Cholesky(float ztol = 1.0e-5)
@@ -564,6 +564,7 @@ public:
 		return ret;
 	}
 
+	/*
 	Matrix inverse()
 	{
 		dtoh(this->h_value, this->d_value, this->size);
@@ -575,6 +576,7 @@ public:
 		ret.dtohSync();
 		return ret;
 	}
+	*/
 
 	void dtohSync()
 	{
