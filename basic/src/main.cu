@@ -809,9 +809,6 @@ int main()
 	//Blelloch_scan();
 	radixSort();
 
-	radixSort();
-	radixSort();
-
 	return 0;
 }
 
