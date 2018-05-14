@@ -810,6 +810,7 @@ int main()
 	radixSort();
 
 	radixSort();
+	radixSort();
 
 	return 0;
 }
